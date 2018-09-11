@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+set -e
+#set -x
+
+CMD=$1
+PID_FILE=delphi.pid
+WD=/Users/sshukl6/workspace/personal/delphi
+
+cd $WD
+
+kill_process () {
+    echo "Killing existing process"
+    if [ -f "$PID_FILE" ]; then
+        PID=`cat "$PID_FILE"`
+        CHILD_PID=`pgrep -P $PID || echo "No process found"`
+        if [ -n "$CHILD_PID" ] && [ "$CHILD_PID" != 'No process found' ]; then
+            echo "Killing child process $CHILD_PID"
+            kill -9 $CHILD_PID || echo "Unable to kill child process"
+        fi
+        if [ -n "$PID" ]; then
+            kill -9 $PID || echo "Unable to kill parent process"
+        fi
+    else
+        echo "No process found"
+    fi
+    echo "Killed all that I could"
+}
+
+start_process () {
+    echo "Trying to start Delphi"
+    nohup /usr/local/bin/nodemon start > delphi.log &
+    echo $! > delphi.pid
+    echo "Process started at localhost:3000"
+}
+
+if [ -z "$CMD" ]; then
+    echo "Usage delphi <start|stop|restart|status>"
+    exit 0
+fi
+
+if [ "$CMD" = "status" ]; then
+    ps -p `cat "$PID_FILE"`
+elif [ "$CMD" = "restart" ] || [ "$CMD" = "start" ]; then
+    kill_process
+    start_process
+elif [ "$CMD" = "stop" ]; then
+    kill_process
+fi
+
+exit 0

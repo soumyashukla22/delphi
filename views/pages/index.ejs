@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= query %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <script
+            src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script type="application/javascript">
+        function handlepaste(elem, e) {
+            var savedcontent = elem.innerHTML;
+            if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
+                window.location = "/?query=" + e.clipboardData.getData('text/plain').replace(/ /g, "+")
+            }
+        }
+    </script>
+
+</head>
+<body onpaste='handlepaste(this, event)'>
+<% include ../partials/navbar.ejs %>
+
+<% if (Object.keys(omdb_data).length <= 0) { %>
+    <h2>No results found for <%= query %></h2>
+<% } else if (Object.keys(omdb_data).length == 1) { %>
+    <h2>Showing results for <%= query %></h2>
+    <div class="row">
+        <div class="col-md-2" align="center">
+            <a href="/?query=<%= omdb_data[0]["imdbid"] %>"><img src="<%= omdb_data[0]["poster"] %>"
+                                                                 style="max-height: 250px"/></a>
+        </div>
+        <div class="col-md-10">
+            <div class="row">
+                <a href="/?query=<%= omdb_data[0]["imdbid"] %>"><h4><%= omdb_data[0]["title"] %>
+                        (<%= omdb_data[0]["year"] %>)</h4></a>
+            </div>
+            <div class="row">
+                <p><b>Genres</b>: <%= omdb_data[0]["genres"] %></p>
+            </div>
+            <div class="row">
+                <p><b>Plot</b>: <%= omdb_data[0]["plot"] %></p>
+            </div>
+            <div class="row">
+                <p><b>Runtime</b>: <%= omdb_data[0]["runtime"] %></p>
+            </div>
+            <% if ('ratings' in omdb_data[0]) { %>
+                <div class="row">
+                    <% omdb_data[0]['ratings'].forEach(function(rating) { %>
+                        <div class="col">
+                            <% if (rating["Source"] == "Internet Movie Database") { %>
+                                <div><b>IMDB Rating</b>: <%= rating["Value"] %></div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    <div>
+        <div class="row text-center"
+             style="overflow-x: auto;white-space: nowrap;background: #e4e4e4;border-width: 2px;border-style: solid;margin: 10px 0px 10px 1px;border-color: #e0dcdc;padding: 5px;">
+            <% youtube_data.forEach(function(entry){ %>
+                <div class="col-md-4" style="display: inline-block; float: none;">
+                    <% console.log(entry) %>
+                    <div class="row">
+                        <iframe width="420" height="315"
+                                src="https://www.youtube.com/embed/<%= entry['id'] %>"></iframe>
+                    </div>
+                    <div class="row"><b><%= entry['title'] %></b></div>
+                </div>
+            <% }) %>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <iframe src="https://www.netflix.com/search?q=<%= omdb_data[0]["title"].replace(/ /g, '%20') %>"
+                    width="100%" height="300px"></iframe>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <iframe src="https://www.primevideo.com/search/ref=atv_nb_sr?phrase=<%= omdb_data[0]["title"].replace(/ /g, '+') %>"
+                    width="100%" height="300px"></iframe>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <iframe src="https://www.hotstar.com/search?q=<%= omdb_data[0]["title"].replace(/ /g, '%20') %>"
+                    width="100%" height="300px"></iframe>
+        </div>
+    </div>
+<% } else { %>
+    <h2>Search Results for <%= query %></h2>
+
+    <div style="padding-bottom: 10px">
+        <div class="row">
+            <% omdb_data.forEach(function(result) { %>
+                <div class="col-md-2" align="center">
+                    <a href="/?query=<%= result["imdbid"] %>"><img src="<%= result["poster"] %>"
+                                                                   style="max-height: 250px"/></a>
+                    <a href="/?query=<%= result["imdbid"] %>"><h4><%= result["title"] %>
+                            (<%= result["year"] %>)</h4></a>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+
+<% } %>
+<!--<p><%= JSON.stringify(Object.keys(omdb_data).length) %></p>-->
+<!--<p><%= JSON.stringify(omdb_data) %></p>-->
+</body>
+</html>
